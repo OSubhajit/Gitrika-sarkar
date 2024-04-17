@@ -1,7 +1,3 @@
-# Gitrika-sarkar
-<br>
-Gitrika sarkar is a simple chatbot.
-
 #include <iostream>
 #include <string>
 #include <limits>
@@ -110,8 +106,8 @@ double calculateProbability(double favorableOutcomes, double totalOutcomes) {
 // Function to get response based on user input
 std::string getResponse(const std::string& input, int sentimentScore, ConversationContext& context) {
     std::map<std::string, std::function<std::string()>> dynamicResponses = {
-        {"how are you", []() {
-            return "I'm doing well, thank you!";
+        {"how are you", [&context]() {
+            return context.isGreetingReceived ? "I'm doing well, thank you!" : "I'm just a simple AI.";
         }},
         {"what is your name", []() {
             return "My name is Gitrika.";
@@ -139,15 +135,18 @@ std::string getResponse(const std::string& input, int sentimentScore, Conversati
         }},
         // Add more mathematical queries here
     };
+
     for (const auto& pair : dynamicResponses) {
         if (input.find(pair.first) != std::string::npos) {
             return pair.second();
         }
     }
-   if (input.find("BODMAS") != std::string::npos) {
+
+    if (input.find("BODMAS") != std::string::npos) {
         return "BODMAS stands for Brackets, Orders (i.e. powers and square roots, etc.), Division and Multiplication, and Addition and Subtraction. It's an order of operations used in mathematics to ensure that calculations are performed in the correct order.";
     }
-  if (input.find("root over") != std::string::npos) {
+
+    if (input.find("root over") != std::string::npos) {
         std::istringstream iss(input);
         std::string dummy, rootType;
         double number;
@@ -163,6 +162,7 @@ std::string getResponse(const std::string& input, int sentimentScore, Conversati
             return "Unsupported root type";
         }
     }
+
     if (input.find("quantity equation") != std::string::npos) {
         std::istringstream iss(input);
         std::string dummy, equation;
@@ -178,7 +178,8 @@ std::string getResponse(const std::string& input, int sentimentScore, Conversati
             return e.what();
         }
     }
-  if (input.find("trigonometry") != std::string::npos) {
+
+    if (input.find("trigonometry") != std::string::npos) {
         std::istringstream iss(input);
         std::string trigFunction;
         char dummy;
@@ -192,26 +193,29 @@ std::string getResponse(const std::string& input, int sentimentScore, Conversati
             return e.what();
         }
     }
-   if (input.find("probability") != std::string::npos) {
+
+    if (input.find("probability") != std::string::npos) {
         // Example: "probability of rolling a six on a fair six-sided die"
         // Implement probability calculation logic here
         // For now, let's return a placeholder response
         return "Probability calculation not implemented yet.";
     }
-   // Default response for unrecognized queries
+
+    // Default response for unrecognized queries
     if (sentimentScore > 0) {
         return "It sounds like you're feeling positive!";
     } else if (sentimentScore < 0) {
         return "I'm sorry to hear that you're feeling negative. Is there anything I can do to help?";
     }
 
-   try {
+    try {
         double result = evaluateExpression(input);
         return "The result is: " + std::to_string(result);
     } catch (const std::invalid_argument&) {
         return "I'm not sure how to respond to that.";
     }
 }
+
 // Function to safely read passwords with masking
 std::string readPassword() {
     std::string password;
@@ -242,36 +246,42 @@ void printWelcomeBanner(const std::string& username) {
 int main() {
     const std::string yourUsername = "subhajit";
     const std::string yourPassword = "classmate!@#$";
+
     std::string username, password;
 
- std::cout << "Enter your username: ";
+    std::cout << "Enter your username: ";
     std::cin >> username;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear the buffer
     password = readPassword();
 
-   if (username != yourUsername || password != yourPassword) {
+    if (username != yourUsername || password != yourPassword) {
         std::cout << "\nUnauthorized access. Please enter the correct credentials.\n";
         return 1;
     }
 
-   printWelcomeBanner(username);
+    printWelcomeBanner(username);
 
-  std::string userInput;
+    std::string userInput;
     ConversationContext context;
     context.isGreetingReceived = false;
+
     while (true) {
         std::cout << "> ";
         std::getline(std::cin, userInput);
+
         if (userInput == "bye") {
             std::cout << "Goodbye!\n";
             break;
         }
-        int sentimentScore =analyzeSentiment(userInput);
+
+        int sentimentScore = analyzeSentiment(userInput);
         std::cout << getResponse(userInput, sentimentScore, context) << std::endl;
-    if (userInput.find("hi") != std::string::npos) {
+
+        if (userInput.find("hi") != std::string::npos) {
             context.isGreetingReceived = true;
         }
         context.lastUserInput = userInput;
     }
-   return 0;
+
+    return 0;
 }
